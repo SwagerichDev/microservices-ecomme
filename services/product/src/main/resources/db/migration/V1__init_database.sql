@@ -1,0 +1,19 @@
+CREATE SEQUENCE IF NOT EXISTS category_id_seq INCREMENT BY 1 START WITH 1;
+CREATE SEQUENCE IF NOT EXISTS product_id_seq INCREMENT BY 1 START WITH 1;
+
+CREATE TABLE IF NOT EXISTS category (
+    id BIGINT  NOT NULL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT
+);
+
+CREATE TABLE IF NOT EXISTS product (
+    id BIGINT  NOT NULL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    available_quantity DOUBLE PRECISION NOT NULL,
+    price DECIMAL(38, 2) NOT NULL,
+    category_id BIGINT NOT NULL,
+    FOREIGN KEY (category_id) REFERENCES category(id)
+);
+
