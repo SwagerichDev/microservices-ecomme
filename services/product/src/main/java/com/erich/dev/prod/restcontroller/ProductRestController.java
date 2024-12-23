@@ -1,6 +1,8 @@
 package com.erich.dev.prod.restcontroller;
 
+import com.erich.dev.prod.dto.request.ProductPurchaseRequest;
 import com.erich.dev.prod.dto.request.ProductRequest;
+import com.erich.dev.prod.dto.response.ProductPurchaseResponse;
 import com.erich.dev.prod.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +26,13 @@ public class ProductRestController {
     }
 
     @PostMapping("/pucharse")
-    public ResponseEntity<?> pucharseProduct(@Valid @RequestBody List<ProductRequest> productRequest) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<ProductPurchaseResponse>> pucharseProduct(@Valid @RequestBody List<ProductPurchaseRequest> productRequests) {
+        return ResponseEntity.ok(productService.productPurchase(productRequests));
     }
 
     @GetMapping("/{product-id}")
     public ResponseEntity<?> getProduct(@PathVariable("product-id") Long id) {
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(productService.findProductById(id));
     }
 
     @GetMapping

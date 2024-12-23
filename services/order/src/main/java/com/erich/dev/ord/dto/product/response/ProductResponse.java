@@ -1,4 +1,4 @@
-package com.erich.dev.prod.dto.response;
+package com.erich.dev.ord.dto.product.response;
 
 import java.math.BigDecimal;
 
@@ -7,9 +7,6 @@ public record ProductResponse(
         String name,
         String description,
         double availableQuantity,
-        BigDecimal price,
-        Long categoryId,
-        String categoryName,
-        String categoryDescription
+        BigDecimal price
 ) {
 }
