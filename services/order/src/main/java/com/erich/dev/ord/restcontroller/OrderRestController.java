@@ -1,13 +1,13 @@
 package com.erich.dev.ord.restcontroller;
 
 import com.erich.dev.ord.dto.request.OrderRequest;
+import com.erich.dev.ord.dto.response.OrderResponse;
 import com.erich.dev.ord.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -26,4 +26,13 @@ public class OrderRestController {
         return ResponseEntity.ok(orderService.createOrder(orderRequest));
     }
 
+    @GetMapping
+    public ResponseEntity<List<OrderResponse>> getOrders() {
+        return ResponseEntity.ok(orderService.findAllOrders());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderResponse> getOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.findOrderById(id));
+    }
 }

@@ -4,8 +4,12 @@ import com.erich.dev.ord.dto.product.request.ProductPurchaseRequest;
 import com.erich.dev.ord.dto.product.response.ProductPurchaseResponse;
 import com.erich.dev.ord.dto.request.OrderLineRequest;
 import com.erich.dev.ord.dto.request.OrderRequest;
-import com.erich.dev.ord.dto.response.CustomerResponse;
+import com.erich.dev.ord.dto.customer.response.CustomerResponse;
+import com.erich.dev.ord.dto.response.OrderResponse;
 import com.erich.dev.ord.entity.Order;
+import com.erich.dev.ord.exception.NotFoundException;
+import com.erich.dev.ord.kafka.OrderConfirmation;
+import com.erich.dev.ord.kafka.producer.OrderProducer;
 import com.erich.dev.ord.proxy.CustomerClient;
 import com.erich.dev.ord.proxy.ProductClient;
 import com.erich.dev.ord.repository.OrderRepository;
@@ -15,6 +19,7 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -31,14 +36,17 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderLineService orderLineService;
 
+    private final OrderProducer orderProducer;
+
 
     @Override
+    @Transactional
     public long createOrder(OrderRequest orderRequest) {
         //customer
-        this.findCustomerId(orderRequest.customerId());
+        var customer = this.findCustomerId(orderRequest.customerId());
 
         //product
-       this.productPurchase(orderRequest.products());
+        var productPurchaseResponses = this.productPurchase(orderRequest.products());
 
         //persist order
         Order order = orderRepository.save(toOrder(orderRequest));
@@ -52,8 +60,39 @@ public class OrderServiceImpl implements OrderService {
                     purchaseRequest.quantity()
             ));
         }
+        OrderConfirmation orderConfirmation = new OrderConfirmation(
+                orderRequest.reference(),
+                orderRequest.totalAmount(),
+                orderRequest.paymentMethod(),
+                customer,
+                productPurchaseResponses
+        );
+        orderProducer.sendOrderConfirmation(orderConfirmation);
+        return order.getId();
+    }
 
-        return 0;
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderResponse> findAllOrders() {
+        return orderRepository.findAll().stream().map(this::fromOrder).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderResponse findOrderById(Long id) {
+        return orderRepository.findById(id)
+                .map(this::fromOrder)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+    }
+
+    private OrderResponse fromOrder(Order order){
+        return new OrderResponse(
+                order.getId(),
+                order.getReference(),
+                order.getTotalAmount(),
+                order.getPaymentMethod(),
+                order.getCustomerId()
+                );
     }
 
     private Order toOrder(OrderRequest orderRequest){
