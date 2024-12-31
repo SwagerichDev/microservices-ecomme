@@ -2,6 +2,7 @@ package com.erich.dev.cust.restcontroller;
 
 import com.erich.dev.cust.dto.request.CustomerRequest;
 import com.erich.dev.cust.service.CustomerService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class CustomerRestController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createCustomer(@Validated @RequestBody CustomerRequest customer){
+    public ResponseEntity<?> createCustomer(@Valid @RequestBody CustomerRequest customer){
         return ResponseEntity.ok(customerService.createCustomer(customer));
     }
 

@@ -35,7 +35,6 @@ public class Order {
     private String customerId;
 
     @OneToMany(mappedBy = "order")
-    @JoinColumn(name = "order_id")
     private List<OrderLine> orderLines = new ArrayList<>();
 
     @CreatedDate

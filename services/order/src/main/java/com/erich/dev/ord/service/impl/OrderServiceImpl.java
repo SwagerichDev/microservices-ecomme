@@ -1,5 +1,6 @@
 package com.erich.dev.ord.service.impl;
 
+import com.erich.dev.ord.dto.payment.request.PaymentRequest;
 import com.erich.dev.ord.dto.product.request.ProductPurchaseRequest;
 import com.erich.dev.ord.dto.product.response.ProductPurchaseResponse;
 import com.erich.dev.ord.dto.request.OrderLineRequest;
@@ -11,6 +12,7 @@ import com.erich.dev.ord.exception.NotFoundException;
 import com.erich.dev.ord.kafka.OrderConfirmation;
 import com.erich.dev.ord.kafka.producer.OrderProducer;
 import com.erich.dev.ord.proxy.CustomerClient;
+import com.erich.dev.ord.proxy.PaymentClient;
 import com.erich.dev.ord.proxy.ProductClient;
 import com.erich.dev.ord.repository.OrderRepository;
 import com.erich.dev.ord.service.OrderLineService;
@@ -38,6 +40,8 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderProducer orderProducer;
 
+    private final PaymentClient paymentClient;
+
 
     @Override
     @Transactional
@@ -60,6 +64,17 @@ public class OrderServiceImpl implements OrderService {
                     purchaseRequest.quantity()
             ));
         }
+
+        var paymentRequest = new PaymentRequest(
+                order.getId(),
+                orderRequest.paymentMethod(),
+                orderRequest.totalAmount(),
+                order.getReference(),
+                customer
+        );
+
+        paymentClient.createPayment(paymentRequest);
+
         OrderConfirmation orderConfirmation = new OrderConfirmation(
                 orderRequest.reference(),
                 orderRequest.totalAmount(),
@@ -120,7 +135,7 @@ public class OrderServiceImpl implements OrderService {
 
     public CustomerResponse findCustomerId(String customerId) {
         try {
-            log.info("Finding customer by id: {}", customerId);
+            log.info("Finding customer by customerId: {}", customerId);
             return this.customerClient.findById(customerId);
         } catch (FeignException e) {
             log.error("Customer not found or not available");

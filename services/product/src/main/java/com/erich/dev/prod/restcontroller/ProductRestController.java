@@ -36,8 +36,8 @@ public class ProductRestController {
     }
 
     @GetMapping
-    public ResponseEntity<?> findAllPagination(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                               @RequestParam(value = "size", defaultValue = "10") Integer size) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> findAllPagination(@RequestParam(value = "page", defaultValue = "0") int page,
+                                               @RequestParam(value = "size", defaultValue = "5") int size) {
+        return ResponseEntity.ok(productService.findAllProducts(page, size));
     }
 }

@@ -3,6 +3,7 @@ package com.erich.dev.ord.proxy;
 import com.erich.dev.ord.dto.product.request.ProductPurchaseRequest;
 import com.erich.dev.ord.dto.product.response.ProductPurchaseResponse;
 import com.erich.dev.ord.dto.product.response.ProductResponse;
+import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,5 +21,5 @@ public interface ProductClient {
 
 
     @PostMapping("/pucharse")
-    List<ProductPurchaseResponse> pucharseProduct(@RequestBody List<ProductPurchaseRequest> productRequests);
+    List<ProductPurchaseResponse> pucharseProduct(@Valid @RequestBody List<ProductPurchaseRequest> productRequests);
 }

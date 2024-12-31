@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 public record ProductPurchaseRequest(
 
         @NotNull
-        Long id,
+        Long productId,
 
         @NotNull
         double quantity

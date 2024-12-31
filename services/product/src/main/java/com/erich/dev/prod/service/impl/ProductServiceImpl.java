@@ -4,6 +4,7 @@ import com.erich.dev.prod.dto.request.ProductPurchaseRequest;
 import com.erich.dev.prod.dto.request.ProductRequest;
 import com.erich.dev.prod.dto.response.ProductPurchaseResponse;
 import com.erich.dev.prod.dto.response.ProductResponse;
+import com.erich.dev.prod.dto.response.ProductResponsePag;
 import com.erich.dev.prod.entity.Category;
 import com.erich.dev.prod.entity.Product;
 import com.erich.dev.prod.exception.NotFoundException;
@@ -12,9 +13,9 @@ import com.erich.dev.prod.respository.ProductRepository;
 import com.erich.dev.prod.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.flywaydb.core.internal.util.CollectionsUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +42,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public List<ProductPurchaseResponse> productPurchase(List<ProductPurchaseRequest> productRequests) {
         Map<Long, ProductPurchaseRequest> requestMap = productRequests.stream()
-                .collect(Collectors.toMap(ProductPurchaseRequest::id, request -> request));
+                .collect(Collectors.toMap(ProductPurchaseRequest::productId, request -> request));
         List<Product> products = productRepository.findAllByIdInOrderById(requestMap.keySet());
         this.validateProductsExist(requestMap.keySet(), products);
         return this.processProductPurchase(products, requestMap);
@@ -79,10 +80,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductResponse> findAllProducts(int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size).withSort(Sort.Direction.DESC, "id");
-        Page<Product> products = productRepository.findAll(pageRequest);
-        return products.getContent().stream().map(this::toProductResponse).toList();
+    public ProductResponsePag findAllProducts(int page, int size) {
+        Pageable pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "id");
+        Page<Product> productsPage = productRepository.findAll(pageRequest);
+        List<ProductResponse> productsResponse = productsPage.getContent().stream().map(this::toProductResponse).toList();
+        Map<String,Object> pages = Map.of("totalPages", productsPage.getTotalPages(), "totalElements", productsPage.getTotalElements(),"pageNumber",productsPage.getNumber());
+        return new ProductResponsePag(productsResponse, pages);
     }
 
     protected Product toProduct(ProductRequest productRequest) {
@@ -112,8 +115,8 @@ public class ProductServiceImpl implements ProductService {
                 product.getId(),
                 product.getName(),
                 product.getDescription(),
-                quantity,
-                product.getPrice());
+                product.getPrice(),
+                quantity);
     }
 
     private void validateProductsExist(Set<Long> requestedIds, List<Product> foundProducts) {

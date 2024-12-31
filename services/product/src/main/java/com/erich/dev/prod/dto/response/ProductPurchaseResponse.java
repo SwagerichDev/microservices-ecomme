@@ -7,8 +7,8 @@ public record ProductPurchaseResponse(
         Long id,
         String name,
         String description,
-        double availableQuantity,
-        BigDecimal price
+        BigDecimal price,
+        double quantity
 
 ) {
 }

@@ -4,6 +4,7 @@ import com.erich.dev.prod.dto.request.ProductPurchaseRequest;
 import com.erich.dev.prod.dto.request.ProductRequest;
 import com.erich.dev.prod.dto.response.ProductPurchaseResponse;
 import com.erich.dev.prod.dto.response.ProductResponse;
+import com.erich.dev.prod.dto.response.ProductResponsePag;
 
 import java.util.List;
 
@@ -16,5 +17,5 @@ public interface ProductService {
 
     ProductResponse findProductById(Long productId);
 
-    List<ProductResponse> findAllProducts(int page, int size);
+    ProductResponsePag findAllProducts(int page, int size);
 }

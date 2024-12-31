@@ -3,10 +3,10 @@ package com.erich.dev.ord.dto.product.response;
 import java.math.BigDecimal;
 
 public record ProductPurchaseResponse(
-        Long id,
+        Long productId,
         String name,
         String description,
-        double availableQuantity,
-        BigDecimal price
+        BigDecimal price,
+        double quantity
 ) {
 }
