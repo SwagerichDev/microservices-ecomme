@@ -9,3 +9,9 @@ spring:
   cloud:
     config:
       override-system-properties: false
+
+# Zipkin por defecto usa el puerto 9411 (ver dockercompose)
+management:
+     tracing:
+       sampling:
+         probability: 1.0
